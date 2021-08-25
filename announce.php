@@ -248,6 +248,15 @@ if (!isset($_SERVER['HTTP_USER_AGENT'])) {
 //When should we remove the client?
 $expire = time()+$interval;
 
+//Respect proxies
+if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+    $ip = $_SERVER['HTTP_CLIENT_IP'];
+} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+} else {
+    $ip = $_SERVER['REMOTE_ADDR'];
+}
+
 //Have this client registered itself before? Check that it uses the same key
 if (isset($d[$sum])) {
 	if ($d[$sum][6] !== $_GET['key']) {
@@ -257,7 +266,7 @@ if (isset($d[$sum])) {
 }
 
 //Add/update the client in our global list of clients, with some information
-$d[$sum] = array($_SERVER['REMOTE_ADDR'], $_GET['peer_id'], $_GET['port'], $expire, $_GET['info_hash'], $_SERVER['HTTP_USER_AGENT'], $_GET['key'], is_seed());
+$d[$sum] = array($ip, $_GET['peer_id'], $_GET['port'], $expire, $_GET['info_hash'], $_SERVER['HTTP_USER_AGENT'], $_GET['key'], is_seed());
 
 //No point in saving the user agent, unless we are debugging
 if (!__DEBUGGING_ON) {
